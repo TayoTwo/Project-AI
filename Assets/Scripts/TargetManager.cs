@@ -7,7 +7,7 @@ public class TargetManager : MonoBehaviour
 
     public GameObject targetPrefab;
     public CarController car;
-    public List<Target> targets = new List<Target>();
+    public List<GameObject> targets = new List<GameObject>();
 
     void Start(){
 
@@ -20,7 +20,7 @@ public class TargetManager : MonoBehaviour
 
         GameObject obj = (GameObject)Instantiate(targetPrefab,pos,Quaternion.identity);
 
-        targets.Add(obj.GetComponent<Target>());
+        targets.Add(obj);
 
     }
 

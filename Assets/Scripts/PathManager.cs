@@ -17,13 +17,13 @@ public class PathManager : MonoBehaviour{
         targetManager = GetComponent<TargetManager>();
 
         nodeManager.Initialize();
-        FindPath(car.position,target.position);
+        //FindPath(car.position,target.position);
 
     }
 
     void Update(){
 
-        //FindPath(car.position,target.position);
+        FindPath(car.position,target.position);
 
     }
 
