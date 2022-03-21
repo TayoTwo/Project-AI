@@ -18,6 +18,7 @@ public class TargetManager : MonoBehaviour
     
     public void SpawnTarget(Vector3 pos){
 
+        //Spawn our target prefab at a specific position
         GameObject obj = (GameObject)Instantiate(targetPrefab,pos,Quaternion.identity);
 
         targets.Add(obj);

@@ -7,7 +7,7 @@ public class PathManager : MonoBehaviour{
     public Transform car;
     public Transform target;
     public List<Cell> openSet = new List<Cell>();
-    public HashSet<Cell> closedSet = new HashSet<Cell>();
+    public List<Cell> closedSet = new List<Cell>();
     CellManager cellManager;
     TargetManager targetManager;
 
@@ -17,7 +17,6 @@ public class PathManager : MonoBehaviour{
         targetManager = GetComponent<TargetManager>();
 
         cellManager.Initialize();
-        //FindPath(car.position,target.position);
 
     }
 
@@ -29,23 +28,25 @@ public class PathManager : MonoBehaviour{
 
     void FindPath(Vector3 s, Vector3 e){
 
+        //Clear the previous frame's data
         targetManager.ClearTargets();
         openSet.Clear();
         closedSet.Clear();
 
+        //Set the start and end of the path
         Cell start = cellManager.WorldPosToCell(s);
         Cell end = cellManager.WorldPosToCell(e);
 
-        //Debug.Log(end.gridPos);
-
+        //Add the start to your open set
         openSet.Add(start);
 
+        //Loop until we've cleared our open set
         while(openSet.Count > 0){
 
+            //Set the current cell to the first cell in the set
             Cell currentCell = openSet[0];
 
             for(int i = 1; i < openSet.Count;i++){
-
 
                 //If the open set and closed set have the same F cost then compare their H costs instead (distance to target Cell)
                 if(openSet[i].F() < currentCell.F() 
@@ -58,20 +59,20 @@ public class PathManager : MonoBehaviour{
 
             }
 
+            //Remove the cell from the open set and add it to our closed set
             openSet.Remove(currentCell);
             closedSet.Add(currentCell);
 
             if(currentCell == end){
 
-                //We've reached our target
-                //Debug.Log("PATH FOUND");
+                //We've reached our target so retrace our steps and tell the car to start moving towards its target
                 Retrace(start,end);
                 targetManager.SetCarTarget();
                 return;
 
             }
 
-
+            //Look through the current cells neighbouring cells and set their G cost, H cost and its parent cell
             foreach(Cell neigh in cellManager.GetNeighbours(currentCell)){
 
                 if(!neigh.walkable || closedSet.Contains(neigh)){
@@ -80,10 +81,10 @@ public class PathManager : MonoBehaviour{
 
                 }
 
-
-
+                //Calculate the path distance from the start to the neighbour
                 int disToNeighbour = currentCell.g + GetDis(currentCell,neigh);
 
+                //If the G cost of the neighbouring cell is inaccurate then update the cell
                 if(disToNeighbour < neigh.g || !openSet.Contains(neigh)){
 
                     neigh.g = disToNeighbour;
@@ -92,6 +93,7 @@ public class PathManager : MonoBehaviour{
 
                     if(!openSet.Contains(neigh)){
 
+                        //Add the neighbouring cell to the open set
                         openSet.Add(neigh);
 
                     }
@@ -109,6 +111,7 @@ public class PathManager : MonoBehaviour{
 
         List<Cell> path = new List<Cell>();
 
+        //Start at the end of the path
         Cell current = end;
 
         //Loop backwards
@@ -122,6 +125,7 @@ public class PathManager : MonoBehaviour{
 
         }
 
+        //Reverse the path so that it goes start to end
         path.Reverse();
         targetManager.targets.Reverse();
 
