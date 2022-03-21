@@ -6,17 +6,17 @@ public class PathManager : MonoBehaviour{
 
     public Transform car;
     public Transform target;
-    public List<Node> openSet = new List<Node>();
-    public HashSet<Node> closedSet = new HashSet<Node>();
-    NodeManager nodeManager;
+    public List<Cell> openSet = new List<Cell>();
+    public HashSet<Cell> closedSet = new HashSet<Cell>();
+    CellManager cellManager;
     TargetManager targetManager;
 
     void Awake(){
 
-        nodeManager = GetComponent<NodeManager>();
+        cellManager = GetComponent<CellManager>();
         targetManager = GetComponent<TargetManager>();
 
-        nodeManager.Initialize();
+        cellManager.Initialize();
         //FindPath(car.position,target.position);
 
     }
@@ -33,8 +33,8 @@ public class PathManager : MonoBehaviour{
         openSet.Clear();
         closedSet.Clear();
 
-        Node start = nodeManager.WorldPosToNode(s);
-        Node end = nodeManager.WorldPosToNode(e);
+        Cell start = cellManager.WorldPosToCell(s);
+        Cell end = cellManager.WorldPosToCell(e);
 
         //Debug.Log(end.gridPos);
 
@@ -42,26 +42,26 @@ public class PathManager : MonoBehaviour{
 
         while(openSet.Count > 0){
 
-            Node currentNode = openSet[0];
+            Cell currentCell = openSet[0];
 
             for(int i = 1; i < openSet.Count;i++){
 
 
-                //If the open set and closed set have the same F cost then compare their H costs instead (distance to target node)
-                if(openSet[i].F() < currentNode.F() 
-                || (openSet[i].F() == currentNode.F() && openSet[i].h < currentNode.h)){
+                //If the open set and closed set have the same F cost then compare their H costs instead (distance to target Cell)
+                if(openSet[i].F() < currentCell.F() 
+                || (openSet[i].F() == currentCell.F() && openSet[i].h < currentCell.h)){
 
                                 
-                    currentNode = openSet[i];
+                    currentCell = openSet[i];
 
                 }
 
             }
 
-            openSet.Remove(currentNode);
-            closedSet.Add(currentNode);
+            openSet.Remove(currentCell);
+            closedSet.Add(currentCell);
 
-            if(currentNode == end){
+            if(currentCell == end){
 
                 //We've reached our target
                 //Debug.Log("PATH FOUND");
@@ -72,7 +72,7 @@ public class PathManager : MonoBehaviour{
             }
 
 
-            foreach(Node neigh in nodeManager.GetNeighbours(currentNode)){
+            foreach(Cell neigh in cellManager.GetNeighbours(currentCell)){
 
                 if(!neigh.walkable || closedSet.Contains(neigh)){
 
@@ -82,13 +82,13 @@ public class PathManager : MonoBehaviour{
 
 
 
-                int disToNeighbour = currentNode.g + GetDis(currentNode,neigh);
+                int disToNeighbour = currentCell.g + GetDis(currentCell,neigh);
 
                 if(disToNeighbour < neigh.g || !openSet.Contains(neigh)){
 
                     neigh.g = disToNeighbour;
                     neigh.h = GetDis(neigh,end);
-                    neigh.parent = currentNode;
+                    neigh.parent = currentCell;
 
                     if(!openSet.Contains(neigh)){
 
@@ -105,20 +105,20 @@ public class PathManager : MonoBehaviour{
 
     }
 
-    void Retrace(Node start,Node end){
+    void Retrace(Cell start,Cell end){
 
-        List<Node> path = new List<Node>();
+        List<Cell> path = new List<Cell>();
 
-        Node c = end;
+        Cell current = end;
 
         //Loop backwards
-        while(c != start){
-            path.Add(c);
-            //Spawn a target at the nodes position
-            targetManager.SpawnTarget(c.pos);
+        while(current != start){
+            path.Add(current);
+            //Spawn a target at the Cells position
+            targetManager.SpawnTarget(current.pos);
 
-            //Set the current node to its parent node
-            c = c.parent;
+            //Set the current Cell to its parent Cell
+            current = current.parent;
 
         }
 
@@ -127,7 +127,7 @@ public class PathManager : MonoBehaviour{
 
     }
 
-    int GetDis(Node a, Node b){
+    int GetDis(Cell a, Cell b){
 
         int x = Mathf.Abs(a.gridPos.x - b.gridPos.x);
         int y = Mathf.Abs(a.gridPos.y - b.gridPos.y);
