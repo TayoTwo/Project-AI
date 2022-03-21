@@ -27,6 +27,7 @@ public class TargetManager : MonoBehaviour
 
     public void SetCarTarget(){
 
+        //Set the car to follow the beginning of the path, because the path gets updated with the players position 
         car.target = targets[0].transform;
 
     }
